@@ -14,28 +14,58 @@
 
 #include <stdint.h>
 #include <stdlib.h>
-#include <vector>
 
-struct Header;
-struct Memory;
+const int32_t maxBlockSize = 8096;
+const int32_t arrblockSize = 254;
 
 class RushBAllocator {
 public:
-    RushBAllocator();
+    
+    struct Data {
+        char * mem;
+        size_t size;
+    };
+    
+    RushBAllocator(const size_t totalSize);
+    
     ~RushBAllocator();
     
+    size_t Allocate(const size_t size);
     
-    void* Allocate(int32_t size);
-    void Free(void* p, int32_t size);
+    void Free(void* ptr, size_t size);
     
-    void Empty();
+    void* OffsetToPointer(size_t offset);
     
+    uint64_t Verify(uint64_t checksum);
+    
+    Data GetData();
+    
+    void SetData(Data data);
+    
+    void Init();
+    
+    void Reset();
 private:
-    Memory* mem;
+    size_t totalSize;
     
-    //std::vector<std::vector<Header*>> freeList;
-    Header* freeLists[254];
+    char* startOfMem;
+    size_t offset;
+    
+    struct FreeHeader {
+        size_t blockSize;
+    };
+    struct AllocationHeader {
+        size_t next;
+        size_t blockSize;
+        char padding;
+    };
+    
+    size_t m_freeList[arrblockSize] = {0};
+    
+    const int32_t FreeHeaderSize = sizeof(FreeHeader);
+    const int32_t AllocationHeaderSize = sizeof(AllocationHeader);
 };
+
 
 
 
