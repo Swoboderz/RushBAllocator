@@ -9,8 +9,14 @@
 
 #include <iostream>
 #include <vector>
-#include "../include/RushBAllocator.h"
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <dlfcn.h>
+//#include "EXORIUM_INTERNAL.hpp"
+#include "RushBAllocator.h"
+//#include "../include/RushBAllocator.h"
 struct myStuff {
     int64_t k = 64;
     int64_t l = 90;
@@ -21,39 +27,32 @@ struct OtherThing {
     long long k = 20;
 };
 
+template<size_t T>
+struct BigBoi {
+    int64_t elements[T];
+};
+
 int main(int argc, const char * argv[]) {
     //Allocates 1GB of memory, in most cases this is fine.
     RushBAllocator allocator(1e9);
     
-    size_t meme = allocator.Allocate(sizeof(myStuff));
+    RushBAllocator::RushPointer<myStuff> meme(allocator.Allocate(sizeof(myStuff)), allocator.getStartOfMem());
+    allocator.Free(meme.operator->(), sizeof(myStuff));
     
-    void* trueMem = allocator.OffsetToPointer(meme);
-    
-    myStuff* stuff = new (trueMem) myStuff;
-    meme = allocator.Allocate(sizeof(myStuff));
-    trueMem = allocator.OffsetToPointer(meme);
-    myStuff* stuff2 = new (trueMem) myStuff;
-    meme = allocator.Allocate(sizeof(myStuff));
-    trueMem = allocator.OffsetToPointer(meme);
-    myStuff* stuff3 = new (trueMem) myStuff;
-    
-    allocator.Free(stuff, sizeof(myStuff));
-    allocator.Free(stuff2, sizeof(myStuff));
-    allocator.Free(stuff3, sizeof(myStuff));
-    
-    std::vector<myStuff*> stuffs;
-    for (int i = 0; i < 200000; i++) {
-        size_t tempMem = allocator.Allocate(sizeof(myStuff));
-        void* tempTrueMem = allocator.OffsetToPointer(tempMem);
-        stuffs.push_back(new (tempTrueMem) myStuff);
-    }
-    for (int i = 0; i < 200000; i++) {
-        allocator.Free(stuffs[i], sizeof(myStuff));
+    //srand(time(NULL));
+
+    for (int i = 1; i < 8097; i++) {
+        size_t size = i;
+        RushBAllocator::RushPointer<char> memory(allocator.Allocate(i), allocator.getStartOfMem());
+        allocator.Free(memory.operator->(), size);
     }
     std::cout << std::endl;
     
-    //if this line does not return "0x48d99418278c1656" followed by "1", that means the memory is not the same as my client, if so please report an issue
-    std::cout << allocator.Verify(0x48d99418278c1656) << std::endl;
+    //if this line does not return "0xe8f3785546379dcb" followed by "1", that means the memory is not the same as my client, if so please report an issue
+    std::cout << allocator.Verify(0xe8f3785546379dcb) << std::endl;
+    
+    
+    
     
     return 0;
 }

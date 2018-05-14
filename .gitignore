@@ -25,3 +25,7 @@ DerivedData/
 *.pbxproj
 *.xcworkspacedata
 *.plist
+RushBAllocator/src/RushBAllocator copy.cpp
+RushBAllocator/SquareRoot.h
+RushBAllocator/SquareRoot.h
+RushBAllocator/SquareRoot.c

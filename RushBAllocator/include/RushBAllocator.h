@@ -18,6 +18,8 @@
 const int32_t maxBlockSize = 8096;
 const int32_t arrblockSize = 254;
 
+//Outside allocator for allowed reference
+
 class RushBAllocator {
 public:
     
@@ -26,11 +28,11 @@ public:
         size_t size;
     };
     
-    RushBAllocator(const size_t totalSize);
+    RushBAllocator(const size_t totalSize = 1e9);
     
     ~RushBAllocator();
     
-    size_t Allocate(const size_t size);
+    
     
     void Free(void* ptr, size_t size);
     
@@ -45,15 +47,49 @@ public:
     void Init();
     
     void Reset();
-private:
-    size_t totalSize;
     
-    char* startOfMem;
-    size_t offset;
-    
-    struct FreeHeader {
-        size_t blockSize;
+    template <typename T>
+    class RushPointer {
+        //this MUST be the first element
+        T* address;
+        size_t offset;
+    public:
+        RushPointer(size_t value, char* startOfMem) {
+            address = (T*)(startOfMem + value);
+            offset = value;
+        }
+        ~RushPointer(){
+            
+        }
+        
+        inline T* Fix(char* startOfMem){
+            address = (T*)(startOfMem + offset);
+            return address;
+        }
+        
+        inline T& operator* ()
+        {
+            return *address;
+        }
+        
+        inline T* operator-> ()
+        {
+            return address;
+        }
     };
+
+    size_t Allocate(const size_t size);
+    
+    inline char* getStartOfMem(){
+        return startOfMem;
+    }
+    
+private:
+    char* startOfMem;
+    size_t totalSize = 0;
+    size_t offset = 0;
+    
+    
     struct AllocationHeader {
         size_t next;
         size_t blockSize;
@@ -62,10 +98,9 @@ private:
     
     size_t m_freeList[arrblockSize] = {0};
     
-    const int32_t FreeHeaderSize = sizeof(FreeHeader);
+    
     const int32_t AllocationHeaderSize = sizeof(AllocationHeader);
 };
-
 
 
 
