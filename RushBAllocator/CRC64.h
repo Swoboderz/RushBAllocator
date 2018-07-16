@@ -1,3 +1,6 @@
+#ifndef CRC64_H_
+#define CRC64_H_
+
 /* Redis uses the CRC64 variant with "Jones" coefficients and init value of 0.
 *
 * Specification of this CRC64 variant follows:
@@ -173,10 +176,9 @@ static const uint64_t crc64_tab[256] = {
 #ifdef __cplusplus
 extern "C" {
 #endif
-    //(uint64_t) l = 17957664
 uint64_t crc64(uint64_t crc, const unsigned char* s, uint64_t l) {
     uint64_t j;
-    
+
     for (j = 0; j < l; j++) {
         uint8_t byte = s[j];
         crc = crc64_tab[(uint8_t)crc ^ byte] ^ (crc >> 8);
@@ -194,3 +196,5 @@ int main(void) {
     return 0;
 }
 #endif
+
+#endif /* CRC64_H_ */
